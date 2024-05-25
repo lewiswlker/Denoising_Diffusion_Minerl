@@ -22,22 +22,15 @@ from minerl.data import BufferedBatchIter
 import matplotlib.pyplot as plt
 
 def encode_action(action):
-    # 离散动作直接使用值
     discrete_actions = np.array([
         action['attack'], action['back'], action['forward'],
         action['jump'], action['left'], action['right'],
         action['sneak'], action['sprint']
-    ]).flatten()  # 确保是一维数组
+    ]).flatten() 
 
-    # 处理连续动作：'camera'，直接使用数值
-    # 由于camera的范围是[-180, 180]，我们可以将其标准化到[-1, 1]以提高稳定性
-    camera_actions = np.array(action['camera']).flatten() / 180.0  # 确保是一维数组，并进行标准化
-
-    # 处理枚举动作：'place'
-    # 我们将'dirt'映射为[1]，'none'映射为[0]
+    camera_actions = np.array(action['camera']).flatten() / 180.0
     place_action = np.array([1]) if action['place'] == 'dirt' else np.array([0])
 
-    # 将所有编码后的动作拼接为一个向量
     encoded_action = np.concatenate([discrete_actions, camera_actions, place_action])
 
     return encoded_action
@@ -55,21 +48,21 @@ class MineRLDataset(Dataset):
         self.samples = []
 
         iterator = BufferedBatchIter(self.data)
-        count = 0  # 初始化计数器
+        count = 0  
         for current_state, action, _, _, _ in iterator.buffered_batch_iter(batch_size=1, num_epochs=1):
-            if count >= max_samples:  # 检查是否达到了最大样本数
-                break  # 如果是，则退出循环
-            pov_image = current_state['pov'][0]  # 取序列的第一个图像
+            if count >= max_samples:  
+                break  
+            pov_image = current_state['pov'][0]  
             encoded_action = encode_action(action)
             self.samples.append((pov_image, encoded_action))
-            count += 1  # 更新计数器
+            count += 1  
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
         pov_image, encoded_action = self.samples[idx]
-        pov_image = self.transform(pov_image)  # 应用预处理转换
+        pov_image = self.transform(pov_image)  
         encoded_action = torch.tensor(encoded_action, dtype=torch.float32)
         return pov_image, encoded_action
 
@@ -80,26 +73,21 @@ ModelPrediction = namedtuple('ModelPrediction', ['pred_noise', 'pred_x_start'])
 def exists(x):
     return x is not None
 
-
 def default(val, d):
     if exists(val):
         return val
     return d() if callable(d) else d
 
-
 def identity(t, *args, **kwargs):
     return t
-
 
 def cycle(dl):
     while True:
         for data in dl:
             yield data
 
-
 def has_int_squareroot(num):
     return (math.sqrt(num) ** 2) == num
-
 
 def num_to_groups(num, divisor):
     groups = num // divisor
@@ -109,28 +97,21 @@ def num_to_groups(num, divisor):
         arr.append(remainder)
     return arr
 
-
 def convert_image_to_fn(img_type, image):
     if image.mode != img_type:
         return image.convert(img_type)
     return image
 
-
 # normalization functions
-
 def normalize_to_neg_one_to_one(img):
     return img * 2 - 1
-
 
 def unnormalize_to_zero_to_one(t):
     return (t + 1) * 0.5
 
-
 # classifier free guidance functions
-
 def uniform(shape, device):
     return torch.zeros(shape, device=device).float().uniform_(0, 1)
-
 
 def prob_mask_like(shape, prob, device):
     if prob == 1:
@@ -234,13 +215,11 @@ def extract(a, t, x_shape):
     out = a.gather(-1, t)
     return out.reshape(b, *((1,) * (len(x_shape) - 1)))
 
-
 def linear_beta_schedule(timesteps):
     scale = 1000 / timesteps
     beta_start = scale * 0.0001
     beta_end = scale * 0.02
     return torch.linspace(beta_start, beta_end, timesteps, dtype=torch.float64)
-
 
 def cosine_beta_schedule(timesteps, s=0.008):
     """
@@ -254,37 +233,32 @@ def cosine_beta_schedule(timesteps, s=0.008):
     betas = 1 - (alphas_cumprod[1:] / alphas_cumprod[:-1])
     return torch.clip(betas, 0, 0.999)
 
-
 def process_actions(action_output):
-    # 假设前8位和第11位是离散动作
+
     discrete_actions = torch.sigmoid(action_output[:, :8])
-    # discrete_actions = action_output[:, :8]
     discrete_actions = (discrete_actions > 0.5)
 
-    # 对第9位和第10位连续动作应用tanh激活函数
     continuous_actions = torch.tanh(action_output[:, 8:10])
-    # continuous_actions = action_output[:, 8:10]
-    # 合并处理后的动作向量
+
     processed_action_output = torch.cat(
         [discrete_actions, continuous_actions, discrete_actions[:, -1].unsqueeze(1)], dim=1)
     return processed_action_output
-
 
 class ActionGaussianDiffusion(nn.Module):
     def __init__(
             self,
             model,
             *,
-            image_size=64,  # 输入图像的尺寸
+            image_size=64,  # Input image size
             shape=(1, 11),
-            timesteps=1000,  # 扩散时间步数
-            sampling_timesteps=250,  # 采样使用的时间步数，默认为None，即与timesteps相同
-            objective='pred_x0',  # 扩散过程的目标类型
-            beta_schedule='cosine',  # β值的调度策略
-            ddim_sampling_eta=1.0,  # DDIM采样中的η值
-            offset_noise_strength=0.0,  # 偏移噪声强度
-            min_snr_loss_weight=False,  # 是否使用最小SNR损失权重
-            min_snr_gamma=5  # 最小SNR损失权重的γ值
+            timesteps=1000,  # diffusion time step
+            sampling_timesteps=250,  # The number of timesteps used for sampling, default is None, same as timesteps
+            objective='pred_x0',  # Types of targets of the proliferation process
+            beta_schedule='cosine',  # β Scheduling strategies
+            ddim_sampling_eta=1.0,  
+            offset_noise_strength=0.0, 
+            min_snr_loss_weight=False,  # Whether to use minimum SNR loss weights
+            min_snr_gamma=5  # The value of γ for the minimum SNR loss weights
     ):
         super().__init__()
         self.shape = shape
@@ -309,13 +283,12 @@ class ActionGaussianDiffusion(nn.Module):
         self.ddim_sampling_eta = ddim_sampling_eta
         self.offset_noise_strength = offset_noise_strength
 
-        # 注册必要的缓冲区以便于在设备间移动和保持值不变
+        # Register buffers necessary to move between devices and keep values constant
         self.safe_register_buffer('betas', self.betas)
         self.safe_register_buffer('alphas', self.alphas)
         self.safe_register_buffer('alphas_cumprod', self.alphas_cumprod)
         self.safe_register_buffer('alphas_cumprod_prev', self.alphas_cumprod_prev)
 
-        # 在赋值之前，直接注册计算出的变量为缓冲区
         self.safe_register_buffer('sqrt_alphas_cumprod', torch.sqrt(self.alphas_cumprod))
         self.safe_register_buffer('sqrt_one_minus_alphas_cumprod', torch.sqrt(1. - self.alphas_cumprod))
         self.safe_register_buffer('log_one_minus_alphas_cumprod', torch.log(1. - self.alphas_cumprod))
@@ -329,7 +302,7 @@ class ActionGaussianDiffusion(nn.Module):
         self.safe_register_buffer('posterior_mean_coef2', (1. - self.alphas_cumprod_prev) * torch.sqrt(self.alphas) / (
                 1. - self.alphas_cumprod))
 
-        # 根据目标类型初始化损失权重
+        # Initialize loss weights based on target type
         snr = self.alphas_cumprod / (1 - self.alphas_cumprod)
         maybe_clipped_snr = snr.clone().clamp_(max=min_snr_gamma) if min_snr_loss_weight else snr
         if objective == 'pred_noise':
@@ -341,10 +314,9 @@ class ActionGaussianDiffusion(nn.Module):
         self.safe_register_buffer('loss_weight', self.loss_weight)
 
     def safe_register_buffer(self, name, tensor):
-        # 如果模型已有该属性，先删除
         if hasattr(self, name):
             delattr(self, name)
-        # 注册缓冲区
+        # Registration buffer
         self.register_buffer(name, tensor)
     
     def extract_image_features(self, img):
@@ -406,11 +378,11 @@ class ActionGaussianDiffusion(nn.Module):
         return ModelPrediction(pred_noise=pred_noise, pred_x_start=x_start)
 
     def p_mean_variance(self, x, t, cond_image):
-        # 这里假设`x`是动作向量
+        # Assume here that `x` is the action vector #
         preds = self.model_predictions(x, t, cond_image)
         x_start = preds.pred_x_start
 
-        # 计算后验均值和方差
+        # Calculate the posterior mean and variance
         model_mean, posterior_variance, posterior_log_variance = self.q_posterior(x_start=x_start, x_t=x, t=t)
         return model_mean, posterior_variance, posterior_log_variance, x_start
 
@@ -480,9 +452,7 @@ class ActionGaussianDiffusion(nn.Module):
     @torch.no_grad()
     def sample(self, cond_image):
         shape = self.shape
-        # `shape`参数现在应直接反映动作向量的形状
         sample_fn = self.ddim_sample if self.is_ddim_sampling else self.p_sample_loop
-        # 生成动作向量时需要传入条件图像
         return sample_fn(cond_image)
 
     @torch.no_grad()
@@ -492,17 +462,17 @@ class ActionGaussianDiffusion(nn.Module):
 
         assert action1.shape == action2.shape
 
-        # 为每个动作生成时间步向量
+        # Generate time step vectors for each action
         t_batched = torch.full((action1.size(0),), t, device=device, dtype=torch.long)
 
         # 生成两个动作向量的噪声版本
         noise_action1 = self.q_sample(action1, t_batched)
         noise_action2 = self.q_sample(action2, t_batched)
 
-        # 插值生成新的动作向量
+        # Interpolate to generate new action vectors
         interpolated_action = (1 - lam) * noise_action1 + lam * noise_action2
 
-        # 逆过程生成清晰的动作向量，引入条件图像
+        # Inverse process generates clear action vectors, introduces conditional images
         for i in reversed(range(0, t + 1)):
             interpolated_action, _ = self.p_sample(cond_image, interpolated_action, i)
 
@@ -540,9 +510,9 @@ class ActionGaussianDiffusion(nn.Module):
         else:
             raise ValueError(f'unknown objective {self.objective}')
 
-        # 分别处理离散和连续动作
-        discrete_indices = list(range(8)) + [10]  # 离散动作索引
-        continuous_indices = [8, 9]  # 连续动作索引
+        # Separate handling of discrete and continuous actions
+        discrete_indices = list(range(8)) + [10]  
+        continuous_indices = [8, 9]  
 
         discrete_target = target[:, discrete_indices]
         continuous_target = target[:, continuous_indices]
@@ -550,31 +520,29 @@ class ActionGaussianDiffusion(nn.Module):
         discrete_pred = model_out[:, discrete_indices]
         continuous_pred = model_out[:, continuous_indices]
 
-        # 使用BCELoss计算离散动作损失
+        # Calculating discrete action losses using BCELoss
         bce_with_logits_loss = nn.BCEWithLogitsLoss(reduction='none')
         discrete_loss = bce_with_logits_loss(discrete_pred, discrete_target).mean()
 
-        # 使用MSELoss计算连续动作损失
+        # Calculating Continuous Motion Loss with MSELoss
         mse_loss = nn.MSELoss(reduction='none')
         continuous_loss = mse_loss(continuous_pred, continuous_target).mean()
 
-        # 组合损失
         total_loss = discrete_loss * 0.1 + continuous_loss * 0.9
-        # total_loss = discrete_loss
-        # total_loss = continuous_loss
-        # print('discrete_loss =',discrete_loss,'  continuous_loss =',continuous_loss)
-        # 应用损失权重
+        
+        # Loss weights can be applied
+        
         # loss_weight = extract(self.loss_weight, t, total_loss.shape)
-        # weighted_loss = total_loss * loss_weight
+        #weighted_loss = total_loss * loss_weight
         weighted_loss = total_loss * 1
         return weighted_loss.mean()
 
     def forward(self, img, action, t=None, *args, **kwargs):
-        # 确认图像尺寸
+
         b, _, h, w = img.shape
         assert h == self.image_size and w == self.image_size, f'Image height and width must be {self.image_size}'
 
-        # 如果没有提供时间步t，则随机选择一个
+        # If no time step t is provided, a randomly selected
         t = t if t is not None else torch.randint(0, self.num_timesteps, (b,), device=img.device).long()
 
         return self.p_losses(img, action, t, *args, **kwargs)
