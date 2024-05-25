@@ -19,9 +19,9 @@ pip install -r requirements.txt
 ## Datasets
 We have two datasets, the Navigate dataset for training diffusion models to generate game scenes and the MineRLNavigate-v0 dataset for training conditional diffusion models to generate action vectors. You can download them via:
 1. Download via BaiduDrive:
-[Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
-[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)
-2. If you encounter difficulties with the above methods, you can download them from [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
+   -[Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
+   -[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)
+3. If you encounter difficulties with the above methods, you can download them from [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
 Note that the dataset used to train the diffusion model is composed of images of 64*64 size, so you might need to extract them from the dataset downloaded from the official website, similar to the official code below:
 ```python
 from minerl.data import BufferedBatchIter
