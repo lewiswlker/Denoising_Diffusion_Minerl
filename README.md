@@ -21,6 +21,7 @@ We have two datasets, the Navigate dataset for training diffusion models to gene
 1. Download via BaiduDrive:
 <br>-[Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
 <br>-[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)
+<br>
 3. If you encounter difficulties with the above methods, you can download them from [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
 Note that the dataset used to train the diffusion model is composed of images of 64*64 size, so you might need to extract them from the dataset downloaded from the official website, similar to the official code below:
 ```python
@@ -44,3 +45,87 @@ for current_state, action, reward, next_state, done \
               "can be < max_sequence_len", len(reward))
 ```
 However, for the conditional diffusion model, you don't need to extract the combination of images and actions anymore, because this part we have already implemented in the code.
+
+## Training
+1. train the diffusion model
+   To train the diffusion model, you can use `. /DDPM/train.py`, although you may need to modify the path to the dataset and the path to save the results for checkpoint&model. In addition, you can choose the complexity of the model and auxiliary modules according to your arithmetic power. However, there are some cases where they do not necessarily work better.
+```
+from denoising_diffusion_pytorch import Unet, GaussianDiffusion, Trainer
+
+model = Unet(
+    dim = 96,
+    dim_mults = (1, 2, 4, 8),
+    flash_attn = True
+)
+
+diffusion = GaussianDiffusion(
+    model,
+    image_size = 64,
+    timesteps = 1000,           # number of steps
+    sampling_timesteps = 250
+)
+
+trainer = Trainer(
+    diffusion,
+    '/root/autodl-tmp/navigate_selected',
+    train_batch_size = 64,
+    train_lr = 8e-5,
+    train_num_steps = 150000,         # total training steps
+    gradient_accumulate_every = 2,    # gradient accumulation steps
+    ema_decay = 0.995,                # exponential moving average decay
+    amp = True,                       # turn on mixed precision
+    calculate_fid = True,             # whether to calculate fid during training
+    save_and_sample_every = 5000,
+    results_folder = '/root/autodl-tmp/results',
+    save_best_and_latest_only = True,
+    num_fid_samples = 2000,
+    do_load = False,
+    load_milestone='latest'
+)
+
+trainer.train()
+```
+Once the modifications are complete, run `python train.py` to train the diffusion model based on your training set.
+
+2. train the conditional diffusion model
+   To train a conditional diffusion model, you need to directly use `. /CDDPM/CDDPM.py`. This is a python script that integrates modeling and training, so there is no need to write additional training scripts. You just need to change the directory of the dataset and the directory where the training results are saved in `def main()`.
+```
+def main():
+    os.environ['MINERL_DATA_ROOT'] = '/root/autodl-tmp'
+    results_path = '/root/CDDPM/results'
+    Path(results_path).mkdir(parents=True, exist_ok=True)
+
+    full_dataset = MineRLDataset()
+    train_size = int(0.7 * len(full_dataset))
+    test_size = len(full_dataset) - train_size
+    train_dataset, test_dataset = random_split(full_dataset, [train_size, test_size])
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = ActionGeneratorCNN(dim=64, dim_mults=(1, 2, 4, 8), channels=3, action_dim=11).to(device)
+    diffusion_model = ActionGaussianDiffusion(model=model, image_size=64, shape=(1, 11), timesteps=1000,
+                                              sampling_timesteps=250, objective='pred_x0').to(device)
+    trainer = ConditionalDiffusionTrainer(model, diffusion_model, train_dataset, test_dataset,
+                                          train_batch_size=64, val_batch_size=16, train_lr=1e-6,
+                                          weight_decay=0.01, num_epochs=500, save_and_sample_every=10,
+                                          test_every_n_epochs=1, results_folder=results_path, device=device)
+    
+    best_model_path = os.path.join(results_path, 'model_best.pth')
+    if os.path.exists(best_model_path):
+        print("Loading and testing the best model...")
+        best_model = ActionGaussianDiffusion(model=model, image_size=64, shape=(1, 11), timesteps=1000,
+                                              sampling_timesteps=250, objective='pred_x0').to(device)
+        best_model.load_state_dict(torch.load(best_model_path)['model_state_dict'])
+        tester = TestDiffusionTrainer(best_model, test_dataset, device)
+        tester.test()
+    else:
+        print("No best model found. Training new model...")
+        trainer.train_and_test()
+        print("Training completed. Testing the best model...")
+        # Attempt to test after training if model_best.pth was created
+        if os.path.exists(best_model_path):
+            best_model.load_state_dict(torch.load(best_model_path)['model_state_dict'])
+            tester = TestDiffusionTrainer(best_model, test_dataset, device)
+            tester.test()
+```
+However, if the dataset you downloaded from the official website is not MineRLNavigate-v0, then you need to change it to your dataset name in `class MineRLDataset()`.
