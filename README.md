@@ -162,10 +162,15 @@ For the second task, since in the paper we are forming conclusions by comparing 
 In addition, we also used t-SNE and PCA to downscale the image features extracted by the two models, so that we can see more intuitively how well the two models are able to extract image features. This can be done in part by running `. /CDDPM/t-sne.py`. You can also use Jupyter notebook, we provide `. /Conditional_DDPM/t-sne.ipynb`
 
 # Acknowledgements
-I would like to acknowledge and greatly appreciate the following projects and individuals whose code we have referenced and built upon:：
-* [diffusion](https://github.com/hojonathanho/diffusion) by [hojonathanho](https://github.com/hojonathanho)
+
+I would like to acknowledge and greatly appreciate the following projects and individuals whose code we have referenced and built upon:
+
+* [*diffusion*](https://github.com/hojonathanho/diffusion) by [*hojonathanho*](https://github.com/hojonathanho)
+  
   * Our application of the diffusion model was inspired by their modeling of diffusion
-* [denoising-diffusion-pytorch](https://github.com/lucidrains/denoising-diffusion-pytorch) by [lucidrains](https://github.com/lucidrains)
+    
+* [*denoising-diffusion-pytorch*](https://github.com/lucidrains/denoising-diffusion-pytorch) by [*lucidrains*](https://github.com/lucidrains)
+  
   * Our diffusion and conditional diffusion models are built from their `denoising_diffusion_pytorch.py` and `classifier_free_guidance.py`
 
 I would also like to thank Professor *Mingfei Sun* from *the University of Manchester*, who guided me through this project. This was my first independent research and open-source project in my life, and I am very grateful for his support.
