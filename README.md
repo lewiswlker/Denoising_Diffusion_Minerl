@@ -174,3 +174,7 @@ I would like to acknowledge and greatly appreciate the following projects and in
   * Our diffusion and conditional diffusion models are built from their `denoising_diffusion_pytorch.py` and `classifier_free_guidance.py`
 
 I would also like to thank Professor *Mingfei Sun* from *the University of Manchester*, who guided me through this project. This was my first independent research and open-source project in my life, and I am very grateful for his support.
+
+# License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/lewiswlker/Denoising_Diffusion_Minerl/blob/main/LICENSE) file for details.
