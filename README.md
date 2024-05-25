@@ -160,3 +160,12 @@ In fact, at the time of training, we have used `. /DDPM/fid.py` to compute the F
 For the second task, since in the paper we are forming conclusions by comparing its training effects with BASELINE. Therefore you can directly run `. /CDDPM/baseline.py` to compare the two. The paths are modified as in the previous training of the conditional diffusion model.
 
 In addition, we also used t-SNE and PCA to downscale the image features extracted by the two models, so that we can see more intuitively how well the two models are able to extract image features. This can be done in part by running `. /CDDPM/t-sne.py`. You can also use Jupyter notebook, we provide `. /Conditional_DDPM/t-sne.ipynb`
+
+# Acknowledgements
+We would like to acknowledge and thank the following projects and individuals whose code we have referenced and built upon:：
+* [diffusion](https://github.com/hojonathanho/diffusion) by [hojonathanho](https://github.com/hojonathanho)
+  * Our application of the diffusion model was inspired by their modeling of diffusion
+* [denoising-diffusion-pytorch](https://github.com/lucidrains/denoising-diffusion-pytorch) by [lucidrains](https://github.com/lucidrains)
+  * 我们扩散模型和条件扩散模型的建立来自于他们的`denoising_diffusion_pytorch.py`和`classifier_free_guidance.py`
+
+
