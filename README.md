@@ -1,7 +1,7 @@
 # Denoising_Diffusion_Minerl
 This research is based on the [MineRL 0.4.4](https://minerl.readthedocs.io/en/v0.4.4/) environment, which is based on the popular game Minecraft that provides a realistic, open-world environment containing multiple tasks. In this environment, intelligent agents are required to perform operations such as exploring, resource gathering, tool making and accomplishing diverse tasks. We apply the diffusion model to the MineRL environment, utilizing the powerful generative capabilities of the diffusion model to generate more realistic and varied game scene images, and the conditional diffusion model to generate action sequences for specific game tasks.
 
-We referenced [the Pytorch version of the diffusion model and the conditional diffusion model](https://github.com/lucidrains/denoising-diffusion-pytorch?tab=readme-ov-file). But this is [the official TensorFlow version](https://github.com/hojonathanho/diffusion). 
+We referenced [the Pytorch version](https://github.com/lucidrains/denoising-diffusion-pytorch?tab=readme-ov-file) of the diffusion model and the conditional diffusion model. And this is [the official TensorFlow version](https://github.com/hojonathanho/diffusion). 
 
 <img src="https://github.com/lewiswlker/Denoising_Diffusion_Minerl/blob/main/images/game_scene.png" width="300">
 
@@ -22,6 +22,7 @@ We have two datasets, the Navigate dataset for training diffusion models to gene
 1.Download via BaiduDrive:
 <br>-[Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
 <br>-[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)<br><br>
+
 2.If you encounter difficulties with the above methods, you can download them from : [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
 <br>   
 Note that the dataset used to train the diffusion model is composed of images of 64*64 size, so you might need to extract them from the dataset downloaded from the official website, similar to the official code below:
@@ -48,8 +49,8 @@ for current_state, action, reward, next_state, done \
 However, for the conditional diffusion model, you don't need to extract the combination of images and actions anymore, because this part we have already implemented in the code.
 
 ## Training
-1. train the diffusion model
-   To train the diffusion model, you can use `. /DDPM/train.py`, although you may need to modify the path to the dataset and the path to save the results for checkpoint&model. In addition, you can choose the complexity of the model and auxiliary modules according to your arithmetic power. However, there are some cases where they do not necessarily work better.
+### Train the diffusion model
+To train the diffusion model, you can use `. /DDPM/train.py`, although you may need to modify the path to the dataset and the path to save the results for checkpoint&model. In addition, you can choose the complexity of the model and auxiliary modules according to your arithmetic power. However, there are some cases where they do not necessarily work better.
 ```python
 from denoising_diffusion_pytorch import Unet, GaussianDiffusion, Trainer
 
@@ -88,8 +89,8 @@ trainer.train()
 ```
 Once the modifications are complete, run `python train.py` to train the diffusion model based on your training set.
 
-2. train the conditional diffusion model
-   To train a conditional diffusion model, you need to directly use `. /CDDPM/CDDPM.py`. This is a python script that integrates modeling and training, so there is no need to write additional training scripts. You just need to change the directory of the dataset and the directory where the training results are saved in `def main()`.
+### Train the conditional diffusion model
+To train a conditional diffusion model, you need to directly use `. /CDDPM/CDDPM.py`. This is a python script that integrates modeling and training, so there is no need to write additional training scripts. You just need to change the directory of the dataset and the directory where the training results are saved in `def main()`.
 ```python
 def main():
     os.environ['MINERL_DATA_ROOT'] = '/root/autodl-tmp'
@@ -133,7 +134,7 @@ However, if the dataset you downloaded from the official website is not MineRLNa
 
 
 ## Test
-1.Diffusion modeling
+### Diffusion modeling
 
 For the first task, you can directly use `. /DDPM/minerl_create.py` to generate the game scenario by calling your training results directly. Similarly, in the following code, you need to first change the path of the model you are calling to the folder where it is located, and the path where the generated results are saved.
 ```python
@@ -154,7 +155,7 @@ save_path = Path('/root/autodl-tmp/results_navigate/generate')
 ```
 In fact, at the time of training, we have used `. /DDPM/fid.py` to compute the FID scores for each training phase and the model has been tested.
 
-2.Conditional diffusion modeling
+### Conditional diffusion modeling
 
 For the second task, since in the paper we are forming conclusions by comparing its training effects with BASELINE. Therefore you can directly run `. /CDDPM/baseline.py` to compare the two. The paths are modified as in the previous training of the conditional diffusion model.
 
