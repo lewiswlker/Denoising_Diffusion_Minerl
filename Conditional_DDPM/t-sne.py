@@ -60,11 +60,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Load the trained model
 model_path = '/root/CDDPM/results7/model_best.pth'
+model_path_2 = '/root/CDDPM/results_regre3/best_model.pth'
 checkpoint = torch.load(model_path, map_location=device)
+checkpoint_2 = torch.load(model_path_2, map_location=device)
 model = ActionGeneratorCNN(dim=128, dim_mults=(1, 2, 4, 8), channels=3, action_dim=11).to(device)
 diffusion_model = ActionGaussianDiffusion(model=model, image_size=64, shape=(1, 11), timesteps=1000,
                                           sampling_timesteps=250, objective='pred_x0').to(device)
 diffusion_model.load_state_dict(checkpoint['model_state_dict'])
+model.load_state_dict(checkpoint)
 
 features = []
 for img, _ in data_loader:
@@ -76,3 +79,11 @@ output_dir = '/root/CDDPM/results'
 # Analyze image features using t-SNE and PCA
 plot_tsne(features, output_dir)
 plot_pca(features, output_dir)
+
+features = []
+for img, _ in data_loader:
+    img_features = model.extract_features(img.to(device))
+    features.append(img_features.cpu().detach().numpy())
+features = np.concatenate(features, axis=0)
+# 使用t-SNE分析图像特征
+plot_tsne(features, 'Regression Model Image Features')
