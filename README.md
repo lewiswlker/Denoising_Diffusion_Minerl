@@ -17,13 +17,13 @@ pip install -r requirements.txt
 ```
 
 ## Datasets
-We have two datasets, the Navigate dataset for training diffusion models to generate game scenes and the MineRLNavigate-v0 dataset for training conditional diffusion models to generate action vectors. You can download them via:
+We have two datasets, the Navigate dataset for training diffusion models to generate game scenes and the MineRLNavigate-v0 dataset for training conditional diffusion models to generate action vectors. You can download them through following methods:
 
-1.Download via BaiduDrive:
+1.BaiduDrive:
 <br>-[Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
 <br>-[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)<br><br>
 
-2.If you encounter difficulties with the above methods, you can download them from : [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
+2.If you encounter difficulties with the above methods, you can download them from [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
 <br>   
 Note that the dataset used to train the diffusion model is composed of images of 64*64 size, so you might need to extract them from the dataset downloaded from the official website, similar to the official code below:
 ```python
@@ -88,7 +88,7 @@ trainer = Trainer(
 trainer.train()
 ```
 Once the modifications are complete, run `python train.py` to train the diffusion model based on your training set.
-
+---
 ### Train the conditional diffusion model
 To train a conditional diffusion model, you need to directly use `. /CDDPM/CDDPM.py`. This is a python script that integrates modeling and training, so there is no need to write additional training scripts. You just need to change the directory of the dataset and the directory where the training results are saved in `def main()`.
 ```python
@@ -134,7 +134,7 @@ However, if the dataset you downloaded from the official website is not MineRLNa
 
 
 ## Test
-### Diffusion modeling
+### Diffusion model
 
 For the first task, you can directly use `. /DDPM/minerl_create.py` to generate the game scenario by calling your training results directly. Similarly, in the following code, you need to first change the path of the model you are calling to the folder where it is located, and the path where the generated results are saved.
 ```python
@@ -154,8 +154,8 @@ save_path = Path('/root/autodl-tmp/results_navigate/generate')
 ...
 ```
 In fact, at the time of training, we have used `. /DDPM/fid.py` to compute the FID scores for each training phase and the model has been tested.
-
-### Conditional diffusion modeling
+---
+### Conditional diffusion model
 
 For the second task, since in the paper we are forming conclusions by comparing its training effects with BASELINE. Therefore you can directly run `. /CDDPM/baseline.py` to compare the two. The paths are modified as in the previous training of the conditional diffusion model.
 
