@@ -21,7 +21,7 @@ We have two datasets, the Navigate dataset for training diffusion models to gene
 
 1.Download via BaiduDrive:
 <br>-[Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
-<br>-[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)<br>
+<br>-[MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)<br><br>
 2.If you encounter difficulties with the above methods, you can download them from : [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
 <br>   
 Note that the dataset used to train the diffusion model is composed of images of 64*64 size, so you might need to extract them from the dataset downloaded from the official website, similar to the official code below:
@@ -50,7 +50,7 @@ However, for the conditional diffusion model, you don't need to extract the comb
 ## Training
 1. train the diffusion model
    To train the diffusion model, you can use `. /DDPM/train.py`, although you may need to modify the path to the dataset and the path to save the results for checkpoint&model. In addition, you can choose the complexity of the model and auxiliary modules according to your arithmetic power. However, there are some cases where they do not necessarily work better.
-```
+```python
 from denoising_diffusion_pytorch import Unet, GaussianDiffusion, Trainer
 
 model = Unet(
@@ -90,7 +90,7 @@ Once the modifications are complete, run `python train.py` to train the diffusio
 
 2. train the conditional diffusion model
    To train a conditional diffusion model, you need to directly use `. /CDDPM/CDDPM.py`. This is a python script that integrates modeling and training, so there is no need to write additional training scripts. You just need to change the directory of the dataset and the directory where the training results are saved in `def main()`.
-```
+```python
 def main():
     os.environ['MINERL_DATA_ROOT'] = '/root/autodl-tmp'
     results_path = '/root/CDDPM/results'
@@ -130,3 +130,4 @@ def main():
             tester.test()
 ```
 However, if the dataset you downloaded from the official website is not MineRLNavigate-v0, then you need to change it to your dataset name in `class MineRLDataset()`.
+
