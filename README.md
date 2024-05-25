@@ -3,4 +3,4 @@ This research is based on the [MineRL 0.4.4](https://minerl.readthedocs.io/en/v0
 
 We referenced [the Pytorch version of the diffusion model and the conditional diffusion model](https://github.com/lucidrains/denoising-diffusion-pytorch?tab=readme-ov-file). But this is [the official TensorFlow version](https://github.com/hojonathanho/diffusion). 
 
-![](https://github.com/lewiswlker/Denoising_Diffusion_Minerl/blob/main/images/game_scene.png)
+<img src="https://github.com/lewiswlker/Denoising_Diffusion_Minerl/blob/main/images/game_scene.png" width="500">
