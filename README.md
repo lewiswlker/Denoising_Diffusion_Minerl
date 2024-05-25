@@ -131,3 +131,29 @@ def main():
 ```
 However, if the dataset you downloaded from the official website is not MineRLNavigate-v0, then you need to change it to your dataset name in `class MineRLDataset()`.
 
+
+##Test
+1. Diffusion modeling
+For the first task, you can directly use `. /DDPM/minerl_create.py` to generate the game scenario by calling your training results directly. Similarly, in the following code, you need to first change the path of the model you are calling to the folder where it is located, and the path where the generated results are saved.
+```python
+...
+trainer = Trainer(
+    diffusion_model=diffusion,
+    folder="",
+    train_batch_size=16,
+    train_num_steps=100000,
+    ema_decay=0.995,
+    results_folder='/root/autodl-tmp/results_navigate_2',
+    do_load=True,
+    load_milestone='best'
+)
+...
+save_path = Path('/root/autodl-tmp/results_navigate/generate')
+...
+```
+In fact, at the time of training, we have used `. /DDPM/fid.py` to compute the FID scores for each training phase and the model has been tested.
+
+2. conditional diffusion modeling
+For the second task, since in the paper we are forming conclusions by comparing its training effects with BASELINE. Therefore you can directly run `. /CDDPM/baseline.py` to compare the two. The paths are modified as in the previous training of the conditional diffusion model.
+
+In addition, we also used t-SNE and PCA to downscale the image features extracted by the two models, so that we can see more intuitively how well the two models are able to extract image features. This can be done in part by running `. /CDDPM/t-sne.py`. You can also use Jupyter notebook, we provide `. /Conditional_DDPM/t-sne.ipynb`
