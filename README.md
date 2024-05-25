@@ -7,12 +7,14 @@ We referenced [the Pytorch version of the diffusion model and the conditional di
 
 ##Installation
 1.Clone this repo in the directory.
-'https://github.com/lewiswlker/Denoising_Diffusion_Minerl.git'
+```
+https://github.com/lewiswlker/Denoising_Diffusion_Minerl.git
+```
 2.Install the requirments.
-'''
+```
 cd Denoising_Diffusion_Minerl-main
 pip install -r requirements.txt
-'''
+```
 
 ##Datasets
 We have two datasets, the Navigate dataset for training diffusion models to generate game scenes and the MineRLNavigate-v0 dataset for training conditional diffusion models to generate action vectors. You can download them via:
@@ -21,7 +23,7 @@ We have two datasets, the Navigate dataset for training diffusion models to gene
 [MineRLNavigate-v0](https://pan.baidu.com/s/1KNyvmvtk8YrVPsumA6sRXg?pwd=f2l1)
 2. If you encounter difficulties with the above methods, you can download them from [Minerl's official website](https://minerl.readthedocs.io/en/v0.4.4/tutorials/data_sampling.html).
 Note that the dataset used to train the diffusion model is composed of images of 64*64 size, so you might need to extract them from the dataset downloaded from the official website, similar to the official code below:
-'''python
+```python
 from minerl.data import BufferedBatchIter
 data = minerl.data.make('MineRLObtainDiamond-v0')
 iterator = BufferedBatchIter(data)
@@ -40,5 +42,5 @@ for current_state, action, reward, next_state, done \
         # ... do something with the data.
         print("At the end of trajectories the length"
               "can be < max_sequence_len", len(reward))
-'''
+```
 However, for the conditional diffusion model, you don't need to extract the combination of images and actions anymore, because this part we have already implemented in the code.
