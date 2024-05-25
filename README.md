@@ -5,7 +5,7 @@ We referenced [the Pytorch version of the diffusion model and the conditional di
 
 <img src="https://github.com/lewiswlker/Denoising_Diffusion_Minerl/blob/main/images/game_scene.png" width="300">
 
-##Installation
+## Installation
 1.Clone this repo in the directory.
 ```
 https://github.com/lewiswlker/Denoising_Diffusion_Minerl.git
@@ -16,7 +16,7 @@ cd Denoising_Diffusion_Minerl-main
 pip install -r requirements.txt
 ```
 
-##Datasets
+## Datasets
 We have two datasets, the Navigate dataset for training diffusion models to generate game scenes and the MineRLNavigate-v0 dataset for training conditional diffusion models to generate action vectors. You can download them via:
 1. Download via BaiduDrive:
 [Navigate](https://pan.baidu.com/s/18vsSW7eBcP_8ngMQar6fWA?pwd=w53e)
